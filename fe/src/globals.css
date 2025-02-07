@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+button {
+  transition: all 140ms ease-out;
+}
+
+.btn {
+  padding: 5px 10px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  &:hover,
+  &:focus {
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  &:active {
+    transform: scale(0.8);
+  }
+}
+
+input {
+  /* padding: 5px 10px; */
+  border: 1px solid #000;
+  border-radius: 4px;
+}
