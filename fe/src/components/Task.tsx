@@ -3,15 +3,14 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { LiaEditSolid } from "react-icons/lia";
-import Modal from "./Modal";
-import { useState } from "react";
 
 type TaskProps = {
   task: ITask;
-  handleModalOpen: any;
+  handleModalOpen: (task: ITask) => void;
+  deleteTask: (taskId: string) => void;
 };
 
-const Task = ({ task, handleModalOpen }: TaskProps) => {
+const Task = ({ task, handleModalOpen, deleteTask }: TaskProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task.id });
 
@@ -35,16 +34,15 @@ const Task = ({ task, handleModalOpen }: TaskProps) => {
         </div>
         <div className="flex gap-3 justify-end">
           <button
-            onClick={(e) => {
-              // e.stopPropagation();
-              console.log("open");
-              handleModalOpen(task);
-            }}
+            onClick={() => handleModalOpen(task)}
             className="hover:scale-105"
           >
             <LiaEditSolid className="w-5 h-5" title="edit icon" />
           </button>
-          <button className="hover:scale-105">
+          <button
+            className="hover:scale-105"
+            onClick={() => deleteTask(task.id)}
+          >
             <RiDeleteBin5Line className="w-5 h-5" title="delete icon" />
           </button>
         </div>

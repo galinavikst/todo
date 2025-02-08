@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 export type Status = "to do" | "in progress" | "done";
 
 export interface ITask {
@@ -7,8 +5,9 @@ export interface ITask {
   description: string;
   title: string;
   status: string;
+  boardId: string;
 }
 
 export interface IBoardSections {
-  [taskStatus: string]: ITask[];
+  [taskStatus_boardId: string]: ITask[];
 }

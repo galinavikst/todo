@@ -26,7 +26,11 @@ const BoardSectionList = ({ initTasks }: BoardSectionListProps) => {
     useState<IBoardSections>(initialBoardSections);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // handle click on draggable content (task)
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

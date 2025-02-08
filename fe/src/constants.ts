@@ -3,3 +3,10 @@ export const BOARD_SECTIONS = {
   "in progress": "in progress",
   done: "done",
 };
+
+export const INVALID_INPUT = "Invalid input.";
+
+export const ROUTES = {
+  home: "/",
+  boards: "/boards",
+};

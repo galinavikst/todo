@@ -1,14 +1,14 @@
 import { ReactNode } from "react";
 
 interface IModalProps {
-  onClose: () => void;
+  handleModalClose: () => void;
   children: ReactNode;
-  onSave: () => void;
+  form: string;
 }
 
-const Modal = ({ onClose, onSave, children }: IModalProps) => {
+const Modal = ({ handleModalClose, children, form }: IModalProps) => {
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) handleModalClose();
   };
 
   return (
@@ -19,10 +19,10 @@ const Modal = ({ onClose, onSave, children }: IModalProps) => {
       <div className="flex flex-col justify-between bg-white min-w-[300px] min-h-[150px] p-2 border border-solid rounded-sm border-black-600 shadow-sm ">
         {children}
         <div className="flex gap-2">
-          <button className="grow btn" onClick={onSave}>
+          <button className="grow btn" form={form}>
             Save
           </button>
-          <button className="grow btn" onClick={onClose}>
+          <button className="grow btn" onClick={handleModalClose}>
             Cancel
           </button>
         </div>

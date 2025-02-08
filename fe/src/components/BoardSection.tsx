@@ -8,6 +8,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import Modal from "./Modal";
+import TaskForm from "./TaskForm";
 
 type BoardSectionProps = {
   id: Status;
@@ -21,17 +22,26 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
-  // const handleModalClose = () => {
-  //   setModal({ isOpen: false, action: "" });
-  // };
-
-  const handleModalOpen = (el: any) => {
-    console.log(el);
-    setIsModalOpen(true);
+  const deleteTask = (taskId: string) => {
+    console.log(taskId, "remove here");
   };
 
-  console.log(isModalOpen);
+  const handleModalOpen = (task?: ITask) => {
+    setIsModalOpen(true);
+    if (task) setSelectedTask(task);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleModalSave = (data: ITask) => {
+    console.log("submit", data);
+    handleModalClose();
+  };
 
   return (
     <div className="p-3 bg-slate-200 rounded grow w-1/4 min-w-[200px] h-fit">
@@ -46,7 +56,11 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
           {tasks &&
             tasks.map((el) => (
               <Fragment key={el.id}>
-                <Task task={el} handleModalOpen={handleModalOpen} />
+                <Task
+                  task={el}
+                  handleModalOpen={handleModalOpen}
+                  deleteTask={deleteTask}
+                />
               </Fragment>
             ))}
         </div>
@@ -54,19 +68,24 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
 
       {title === "to do" && (
         <button
-          onClick={handleModalOpen}
+          onClick={() => handleModalOpen()}
           className="bg-white w-full rounded-sm p-3 flex justify-center shadow-sm"
         >
           <IoAddOutline className="w-8 h-8" title="add task icon" />
         </button>
       )}
+
       {isModalOpen && (
         <Modal
-          onClose={() => setIsModalOpen(false)}
-          children={undefined}
-          onSave={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          form="taskForm"
+          handleModalClose={handleModalClose}
+          children={
+            <TaskForm
+              boardId="testid"
+              onsubmit={handleModalSave}
+              defaultValues={selectedTask}
+            />
+          }
         />
       )}
     </div>
