@@ -7,7 +7,7 @@ import { LiaEditSolid } from "react-icons/lia";
 type TaskProps = {
   task: ITask;
   handleModalOpen: (task: ITask) => void;
-  deleteTask: (taskId: string) => void;
+  deleteTask: (taskId: number) => void;
 };
 
 const Task = ({ task, handleModalOpen, deleteTask }: TaskProps) => {

@@ -11,7 +11,7 @@ const boardSlice = createSlice({
   name: "board",
   initialState: {} as BoardState,
   reducers: {
-    setBoard(state, action) {
+    setBoardId(state, action) {
       state.boardId = action.payload;
     },
     setBoards(state, action) {
@@ -20,25 +20,9 @@ const boardSlice = createSlice({
     setTasks(state, action) {
       state.tasks = action.payload;
     },
-    // removeProductFromCard(state, action) {
-    //   state.cardProducts = state.cardProducts.filter(
-    //     (el) => el.id !== action.payload.id
-    //   );
-    // },
-    // changeSingleCardProduct(state, action) {
-    //   state.cardProducts = state.cardProducts.map((el) =>
-    //     el.id === action.payload.id ? action.payload : el
-    //   );
-    // },
   },
 });
 
-export const {
-  setBoard,
-  setBoards,
-  setTasks,
-  // changeSingleCardProduct,
-  // removeProductFromCard,
-} = boardSlice.actions;
+export const { setBoardId, setBoards, setTasks } = boardSlice.actions;
 
 export default boardSlice.reducer;

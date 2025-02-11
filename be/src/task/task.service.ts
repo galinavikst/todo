@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 
 @Injectable()
 export class TaskService {
@@ -12,18 +16,25 @@ export class TaskService {
     private taskRepo: Repository<Task>,
   ) {}
 
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+  async create(createTaskDto: CreateTaskDto) {
+    try {
+      const newTask = this.taskRepo.create(createTaskDto);
+      const res = await this.taskRepo.save(newTask);
+      console.log(res, 'res create task service');
+
+      return res;
+    } catch (error) {
+      console.log('create task service error', error);
+      throw error;
+    }
   }
 
-  async findAll() {
+  async findAll(): Promise<Task[]> {
     try {
-      console.log('task findall');
       const tasks = await this.taskRepo.find();
       return tasks;
     } catch (error) {
-      console.log('findAll task servise', error);
-      throw new Error('findAll task servise');
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -33,15 +44,25 @@ export class TaskService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(id: number): Promise<Task | null> {
+    try {
+      const data = await this.taskRepo.findOneBy({ id });
+      return data;
+    } catch (error) {
+      console.log('findOne task error', id, error);
+      throw new NotFoundException('task not found');
+    }
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task | null> {
+    const res = await this.taskRepo.update(id, updateTaskDto);
+    if (res.affected) return await this.findOne(id);
+    else throw new InternalServerErrorException();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: number): Promise<DeleteResult | string> {
+    const res = await this.taskRepo.delete(id);
+    if (res.affected) return JSON.stringify(id);
+    else throw new InternalServerErrorException('remove task error');
   }
 }

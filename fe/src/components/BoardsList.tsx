@@ -9,27 +9,24 @@ import {
   useAddBoardMutation,
   useDeleteBoardMutation,
   useGetBoardsQuery,
+  useUpdateBoardMutation,
 } from "@/redux/slices/apiSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { setBoards } from "@/redux/slices/boardSlice";
+import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
+import { SerializedError } from "@reduxjs/toolkit";
 
 const BoardsList = () => {
   const dispatch = useAppDispatch();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<string>("");
-  const { boards } = useAppSelector((state) => state.board);
-
-  const { data: allBoards, isLoading } = useGetBoardsQuery();
-
-  useEffect(() => {
-    if (allBoards) dispatch(setBoards(allBoards));
-  }, [allBoards]);
+  const { boards, tasks, boardId } = useAppSelector((state) => state.board);
 
   const [addBoard, { error: addError, isLoading: addLoading }] =
     useAddBoardMutation();
   const [delBoard, { error: deleteError, isLoading: deleteLoading }] =
     useDeleteBoardMutation();
+  const [updateBoard] = useUpdateBoardMutation();
 
   const handleModalOpen = (board?: string | null) => {
     setIsModalOpen(true);
@@ -41,12 +38,16 @@ const BoardsList = () => {
     setSelectedBoard("");
   };
 
-  const deleteBoard = async (boardId: string) => {
+  const deleteBoard = async (id: string) => {
     const res = await delBoard(boardId);
     if (res.data) {
-      const updatedBoards = boards.filter((board) => board.id !== boardId);
+      const updatedBoards = boards.filter((board) => board.id !== id);
       dispatch(setBoards(updatedBoards));
-      // hot toast here
+      // hot toast here board deleted
+      if (boardId === id) {
+        dispatch(setTasks(undefined));
+        dispatch(setBoardId(""));
+      }
     } else if (res.error) {
       console.log(res.error);
       // hot tast error here
@@ -54,23 +55,40 @@ const BoardsList = () => {
   };
 
   const handleModalSave = async (data: { boardId: string }) => {
-    const res = await addBoard({ id: data.boardId });
-    console.log(res);
+    try {
+      if (selectedBoard) {
+        const res = await updateBoard({
+          oldId: selectedBoard,
+          id: data.boardId,
+        });
+        console.log(res, "res update board");
+        const updated = boards.map((el) =>
+          el.id === selectedBoard ? res.data : el
+        );
+        dispatch(setBoards(updated));
 
-    if (res.data) {
-      const updatedBoards = [...boards, res.data];
-      dispatch(setBoards(updatedBoards));
-      // hot toast here
+        if (boardId === selectedBoard) dispatch(setBoardId(res.data?.id));
+
+        // hot toast updated board
+      } else {
+        const res = await addBoard({ id: data.boardId });
+        console.log(res);
+
+        if (res.data) {
+          const updatedBoards = [...boards, res.data];
+          dispatch(setBoards(updatedBoards));
+          // hot toast here
+        } else if (res.error) {
+          console.log(res.error.data.message);
+          // hot tast error here
+        }
+      }
       handleModalClose();
-    } else if (res.error) {
-      console.log(res.error);
+    } catch (error) {
+      console.log(error);
       // hot tast error here
     }
   };
-
-  if (isLoading) {
-    return <div>Loading</div>;
-  }
 
   return (
     <>

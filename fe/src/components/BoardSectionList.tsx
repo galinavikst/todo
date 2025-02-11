@@ -1,7 +1,7 @@
 "use client";
-import { IBoardSections, ITask, Status } from "@/types";
+import { IBoardSections, Status } from "@/types";
 import { findBoardSectionContainer, initializeBoard } from "@/utils/board";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import BoardSection from "./BoardSection";
 import {
   useSensors,
@@ -16,17 +16,14 @@ import {
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useAppSelector } from "@/redux/store";
 
-type BoardSectionListProps = {
-  initTasks: ITask[];
-};
-
-const BoardSectionList = ({ initTasks }: BoardSectionListProps) => {
+const BoardSectionList = () => {
   const { tasks, boardId } = useAppSelector((state) => state.board);
+  const [boardSections, setBoardSections] = useState<IBoardSections>({});
 
-  const initialBoardSections = initializeBoard(initTasks);
-
-  const [boardSections, setBoardSections] =
-    useState<IBoardSections>(initialBoardSections);
+  useEffect(() => {
+    console.log("BoardSectionList useeffect", boardId);
+    if (tasks) setBoardSections(initializeBoard(tasks));
+  }, [tasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -124,26 +121,27 @@ const BoardSectionList = ({ initTasks }: BoardSectionListProps) => {
     }
   };
 
-  console.log("boardSections", boardSections);
-
   return (
-    <div className="flex gap-3 flex-wrap">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        {Object.keys(boardSections).map((status) => (
-          <Fragment key={status}>
-            <BoardSection
-              tasks={boardSections[status]}
-              title={status}
-              id={status as Status}
-            />
-          </Fragment>
-        ))}
-      </DndContext>
+    <div>
+      {boardId && <p className="font-bold uppercase text-center">{boardId}</p>}
+      <div className="flex gap-3 flex-wrap">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          {Object.keys(boardSections).map((status) => (
+            <Fragment key={status}>
+              <BoardSection
+                tasks={boardSections[status]}
+                title={status}
+                id={status as Status}
+              />
+            </Fragment>
+          ))}
+        </DndContext>
+      </div>
     </div>
   );
 };

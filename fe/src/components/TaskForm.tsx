@@ -1,4 +1,5 @@
 import { INVALID_INPUT } from "@/constants";
+import { useAppSelector } from "@/redux/store";
 import { ITask } from "@/types";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -9,7 +10,9 @@ interface TaskFormProps {
   boardId: string;
 }
 
-const TaskForm = ({ onsubmit, defaultValues, boardId }: TaskFormProps) => {
+const TaskForm = ({ onsubmit, defaultValues }: TaskFormProps) => {
+  const { boardId } = useAppSelector((state) => state.board);
+
   const {
     control,
     handleSubmit,

@@ -9,7 +9,14 @@ import {
 } from "@dnd-kit/sortable";
 import Modal from "./Modal";
 import TaskForm from "./TaskForm";
-import { useAppSelector } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import {
+  useAddTaskMutation,
+  useDeleteTaskMutation,
+  useGetBoardsQuery,
+  useUpdateTaskMutation,
+} from "@/redux/slices/apiSlice";
+import { setBoards, setTasks } from "@/redux/slices/boardSlice";
 
 type BoardSectionProps = {
   id: Status;
@@ -18,17 +25,29 @@ type BoardSectionProps = {
 };
 
 const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
+  const dispatch = useAppDispatch();
   const { setNodeRef } = useDroppable({
     id,
   });
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+  const { boardId, tasks: stateTasks } = useAppSelector((state) => state.board);
 
-  console.log(tasks);
+  const [addTask, {}] = useAddTaskMutation();
+  const [delelteTaskMutation, {}] = useDeleteTaskMutation();
+  const [updateTaskMutaion] = useUpdateTaskMutation();
 
-  const deleteTask = (taskId: string) => {
+  const deleteTask = async (taskId: number) => {
     console.log(taskId, "remove here");
+    try {
+      await delelteTaskMutation(taskId);
+      const updatedTask = stateTasks.filter((el: ITask) => el.id !== taskId);
+      dispatch(setTasks(updatedTask));
+      // hot toast here deleted id in res
+    } catch (error) {
+      console.log(error, "deleteTask");
+      // hot toast here not deleted id
+    }
   };
 
   const handleModalOpen = (task?: ITask) => {
@@ -41,9 +60,30 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
     setSelectedTask(null);
   };
 
-  const handleModalSave = (data: ITask) => {
-    console.log("submit", data);
-    handleModalClose();
+  const handleModalSave = async (data: Partial<ITask>) => {
+    try {
+      if (selectedTask) {
+        const res = await updateTaskMutaion({ id: selectedTask.id, ...data });
+        console.log(res, "update task");
+        const updated = stateTasks.map((el) =>
+          el.id === selectedTask.id ? res.data : el
+        );
+        dispatch(setTasks(updated));
+        /// hot toast here task updated
+      } else {
+        const res = await addTask({
+          ...data,
+          boardId,
+          status: "to do",
+        });
+        dispatch(setTasks([...stateTasks, res.data]));
+        /// hot toast here task created
+      }
+      handleModalClose();
+    } catch (error) {
+      console.log(error, "create task");
+      /// hot toast here task not created
+    }
   };
 
   return (

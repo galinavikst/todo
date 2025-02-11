@@ -1,5 +1,5 @@
 import { API_PORT } from "@/constants";
-import { IBoard } from "@/types";
+import { IBoard, ITask } from "@/types";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import { Product } from "./productsSlice";
 
@@ -20,6 +20,9 @@ export const todoApi = createApi({
     getBoardById: builder.query<IBoard, string>({
       query: (id) => `/board/${id}`,
     }),
+    getTasksByBoardId: builder.query<ITask[], string>({
+      query: (id) => `task/board/${id}`,
+    }),
     deleteBoard: builder.mutation<string, string>({
       query(id) {
         return {
@@ -27,20 +30,53 @@ export const todoApi = createApi({
           method: "DELETE",
         };
       },
-      //invalidatesTags: (result, error, id) => [{ type: 'Post', id }],
+    }),
+    updateBoard: builder.mutation<IBoard, { oldId: string; id: string }>({
+      query({ oldId, ...body }) {
+        return {
+          url: `board/${oldId}`,
+          method: "PATCH",
+          body,
+        };
+      },
     }),
 
-    // getCategory: builder.query<Product[], string>({
-    //   query: (category) => `/category/${category}`,
-    // }),
+    addTask: builder.mutation<ITask, Partial<ITask>>({
+      query: (body) => ({
+        url: "task",
+        method: "POST",
+        body,
+      }),
+    }),
+    deleteTask: builder.mutation<number, number>({
+      query(id) {
+        return {
+          url: `task/${id}`,
+          method: "DELETE",
+        };
+      },
+    }),
+    updateTask: builder.mutation<ITask, Partial<ITask>>({
+      query({ id, ...body }) {
+        return {
+          url: `task/${id}`,
+          method: "PATCH",
+          body,
+        };
+      },
+    }),
   }),
 });
 
 export const {
   useAddBoardMutation,
   useDeleteBoardMutation,
+  useUpdateBoardMutation,
   useGetBoardsQuery,
-  // useLazyGetProductsQuery,
+  useLazyGetBoardsQuery,
   useLazyGetBoardByIdQuery,
-  // useLazyGetCategoryQuery,
+  useLazyGetTasksByBoardIdQuery,
+  useAddTaskMutation,
+  useDeleteTaskMutation,
+  useUpdateTaskMutation,
 } = todoApi;

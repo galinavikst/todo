@@ -1,32 +1,59 @@
 "use client";
-import { useLazyGetBoardByIdQuery } from "@/redux/slices/apiSlice";
-import { setBoard } from "@/redux/slices/boardSlice";
+import {
+  useGetBoardsQuery,
+  useLazyGetBoardByIdQuery,
+  useLazyGetBoardsQuery,
+  useLazyGetTasksByBoardIdQuery,
+} from "@/redux/slices/apiSlice";
+import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import React, { useEffect, useState } from "react";
 
 const BoardLoader = () => {
   const dispatch = useAppDispatch();
-  const { boards } = useAppSelector((state) => state.board);
+
+  // const { data: allBoards, isLoading: allBoardsidLoading } =
+  //   useGetBoardsQuery();
+  const [getAllBoards] = useLazyGetBoardsQuery();
+  const [getTasksByBoardId, { data: board, error, isLoading }] =
+    useLazyGetTasksByBoardIdQuery();
 
   const [searchValue, setSearchValue] = useState<string>("");
+  const { boards } = useAppSelector((state) => state.board);
+  console.log("BoardLoader", boards);
 
-  // const [trigger, { data: board, error, isLoading }] =
-  //   useLazyGetBoardByIdQuery();
+  useEffect(() => {
+    const getBoards = async () => {
+      try {
+        const res = await getAllBoards();
+        if (res.data) dispatch(setBoards(res.data));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getBoards();
+
+    // if (allBoards) dispatch(setBoards(allBoards));
+  }, []);
 
   const handleLoad = async () => {
     if (!searchValue.trim()) return;
 
+    console.log("handle load boards", boards);
+
     const selectedBoard = boards.find((el) => el.id === searchValue);
     if (selectedBoard) {
-      dispatch(setBoard(selectedBoard.id));
-    }
+      dispatch(setBoardId(selectedBoard.id));
 
-    // try {
-    //   const res = await trigger(searchValue, true);
-    //   dispatch(setBoard(res.data?.id)); // If you want to store it in Redux
-    // } catch (err) {
-    //   console.error("Error fetching board:", err);
-    // }
+      // get tasks fot board here
+      const res = await getTasksByBoardId(selectedBoard.id);
+      console.log(res);
+      if (res.data) dispatch(setTasks(res.data));
+    } else {
+      //hot toast here
+      console.log("board not found");
+    }
   };
 
   return (

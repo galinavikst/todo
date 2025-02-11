@@ -21,13 +21,9 @@ export class Task {
   @Column()
   status: string;
 
-  // @ManyToOne(() => Board, (board) => board.tasks, { onDelete: 'CASCADE' })
-  // @JoinColumn({ name: 'boardId' }) // Join with the boardId column
-  // board: Board; // Reference to Board entitie
-
   @Column()
   boardId: string;
-  @ManyToOne(() => Board, { cascade: ['remove'] })
+  @ManyToOne(() => Board, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'boardId' }) // Join with the boardId column
   board: Board; // Reference to Board entitie
 }
