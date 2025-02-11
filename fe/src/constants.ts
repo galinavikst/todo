@@ -10,3 +10,5 @@ export const ROUTES = {
   home: "/",
   boards: "/boards",
 };
+
+export const API_PORT = 4000;

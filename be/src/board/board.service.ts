@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,29 +13,61 @@ import { Repository } from 'typeorm';
 export class BoardService {
   constructor(
     @InjectRepository(Board)
-    private boardsRepository: Repository<Board>,
+    private boardsRepo: Repository<Board>,
   ) {}
 
-  create(createBoardDto: CreateBoardDto) {
-    return 'This action adds a new board';
+  async create(createBoardDto: CreateBoardDto): Promise<Board> {
+    const boards = await this.findAll();
+    if (boards.some((board) => board.id === createBoardDto.id))
+      throw new BadRequestException(`${createBoardDto.id} board alredy exist`);
+
+    try {
+      const newBoard = this.boardsRepo.create({
+        id: createBoardDto.id,
+      });
+      const response = await this.boardsRepo.save(newBoard);
+      console.log(response, 'response add');
+
+      return response;
+    } catch (error) {
+      console.log('create boardService', error);
+      throw error;
+    }
   }
 
-  findAll(): Promise<Board[]> {
-    return this.boardsRepository.find();
-    //return `This action returns all board`;
+  async findAll(): Promise<Board[]> {
+    try {
+      const data = await this.boardsRepo.find();
+      return data;
+    } catch (error) {
+      console.log('findAll board error', error);
+      throw new InternalServerErrorException('Failed to fetch boards');
+    }
   }
 
-  findOne(id: string): Promise<Board | null> {
-    return this.boardsRepository.findOneBy({ id });
-    //return `This action returns a #${id} board`;
+  async findOne(id: string): Promise<Board | null> {
+    try {
+      const data = await this.boardsRepo.findOneBy({ id });
+      return data;
+    } catch (error) {
+      console.log('findOne board error', id, error);
+      throw new Error(error);
+    }
   }
 
-  update(id: string, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async update(id: string, updateBoardDto: UpdateBoardDto) {
+    try {
+      return await this.boardsRepo.save({ ...updateBoardDto, id });
+    } catch (error) {
+      console.log('update boardService', error);
+      throw new Error(error);
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    await this.boardsRepository.delete(id);
-    //return `This action removes a #${id} board`;
+  async remove(id: string): Promise<string> {
+    const res = await this.boardsRepo.delete(id);
+    console.log(res);
+    if (res.affected) return JSON.stringify(id);
+    else throw new InternalServerErrorException('remove board error');
   }
 }

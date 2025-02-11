@@ -9,6 +9,7 @@ import {
 } from "@dnd-kit/sortable";
 import Modal from "./Modal";
 import TaskForm from "./TaskForm";
+import { useAppSelector } from "@/redux/store";
 
 type BoardSectionProps = {
   id: Status;
@@ -23,6 +24,8 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+
+  console.log(tasks);
 
   const deleteTask = (taskId: string) => {
     console.log(taskId, "remove here");
@@ -46,15 +49,14 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
   return (
     <div className="p-3 bg-slate-200 rounded grow w-1/4 min-w-[200px] h-fit">
       <p className="capitalize font-bold">{title}</p>
-
-      <SortableContext
-        id={id}
-        items={tasks}
-        strategy={verticalListSortingStrategy}
-      >
-        <div ref={setNodeRef}>
-          {tasks &&
-            tasks.map((el) => (
+      {tasks && (
+        <SortableContext
+          id={id}
+          items={tasks}
+          strategy={verticalListSortingStrategy}
+        >
+          <div ref={setNodeRef}>
+            {tasks.map((el) => (
               <Fragment key={el.id}>
                 <Task
                   task={el}
@@ -63,8 +65,9 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
                 />
               </Fragment>
             ))}
-        </div>
-      </SortableContext>
+          </div>
+        </SortableContext>
+      )}
 
       {title === "to do" && (
         <button

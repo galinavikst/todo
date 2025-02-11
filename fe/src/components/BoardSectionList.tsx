@@ -14,12 +14,15 @@ import {
   DragOverEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
+import { useAppSelector } from "@/redux/store";
 
 type BoardSectionListProps = {
   initTasks: ITask[];
 };
 
 const BoardSectionList = ({ initTasks }: BoardSectionListProps) => {
+  const { tasks, boardId } = useAppSelector((state) => state.board);
+
   const initialBoardSections = initializeBoard(initTasks);
 
   const [boardSections, setBoardSections] =
@@ -121,7 +124,7 @@ const BoardSectionList = ({ initTasks }: BoardSectionListProps) => {
     }
   };
 
-  console.log(boardSections);
+  console.log("boardSections", boardSections);
 
   return (
     <div className="flex gap-3 flex-wrap">

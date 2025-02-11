@@ -1,19 +1,13 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Task } from 'src/task/entities/task.entity';
+import { Entity, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Board {
-  @PrimaryColumn() // Auto-incremented primary key
+  @PrimaryColumn({ nullable: false }) // primary unique by default
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  description: string;
+  //   name: string
 
-  // @OneToMany(() => Task, (task) => task.boardId)
-  // tasks: Task[];
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt: Date;
+  //   @OneToMany(() => Task, (task) => task.board, { cascade: true })
+  //   tasks: Task[];
 }

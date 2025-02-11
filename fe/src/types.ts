@@ -1,7 +1,7 @@
 export type Status = "to do" | "in progress" | "done";
 
 export interface ITask {
-  id: string;
+  id: number;
   description: string;
   title: string;
   status: string;
@@ -10,4 +10,8 @@ export interface ITask {
 
 export interface IBoardSections {
   [taskStatus_boardId: string]: ITask[];
+}
+
+export interface IBoard {
+  id: string;
 }

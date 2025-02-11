@@ -11,9 +11,9 @@ import { Task } from './task/entities/task.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
     BoardModule,
     TaskModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     // TypeOrmModule.forRootAsync({
     //   imports: [ConfigModule],
     //   inject: [ConfigService],
@@ -40,7 +40,6 @@ import { Task } from './task/entities/task.entity';
       entities: [Board, Task],
       synchronize: Boolean(process.env.DB_SYNCHRONIZE),
     }),
-    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

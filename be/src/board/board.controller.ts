@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { Board } from './entities/board.entity';
 
 @Controller('board')
 export class BoardController {
@@ -21,8 +23,10 @@ export class BoardController {
   }
 
   @Get()
-  findAll() {
-    return this.boardService.findAll();
+  async findAll(): Promise<Board[]> {
+    const data = await this.boardService.findAll();
+    if (!data) throw new InternalServerErrorException('error controller');
+    return data;
   }
 
   @Get(':id')

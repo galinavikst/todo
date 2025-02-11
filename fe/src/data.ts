@@ -32,8 +32,8 @@ export const INITIAL_TASKS: ITask[] = [
   },
 ];
 
-export const BOARDS: IBoardSections = {
-  testid: INITIAL_TASKS.filter((task) => task.boardId === "testid"),
-  testid1: INITIAL_TASKS.filter((task) => task.boardId === "testid1"),
-  testid2: INITIAL_TASKS.filter((task) => task.boardId === "testid2"),
-};
+// export const BOARDS: IBoardSections = {
+//   testid: INITIAL_TASKS.filter((task) => task.boardId === "testid"),
+//   testid1: INITIAL_TASKS.filter((task) => task.boardId === "testid1"),
+//   testid2: INITIAL_TASKS.filter((task) => task.boardId === "testid2"),
+// };
