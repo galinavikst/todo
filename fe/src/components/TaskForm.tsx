@@ -7,7 +7,6 @@ import { Controller, useForm } from "react-hook-form";
 interface TaskFormProps {
   onsubmit: (data: ITask) => void;
   defaultValues: ITask | null;
-  boardId: string;
 }
 
 const TaskForm = ({ onsubmit, defaultValues }: TaskFormProps) => {

@@ -6,6 +6,7 @@ export interface ITask {
   title: string;
   status: string;
   boardId: string;
+  orderIndex: number;
 }
 
 export interface IBoardSections {

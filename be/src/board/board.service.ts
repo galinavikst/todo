@@ -30,8 +30,6 @@ export class BoardService {
         id: createBoardDto.id,
       });
       const response = await this.boardsRepo.save(newBoard);
-      console.log(response, 'response add');
-
       return response;
     } catch (error) {
       console.log('create boardService', error);
@@ -44,32 +42,30 @@ export class BoardService {
       const data = await this.boardsRepo.find();
       return data;
     } catch (error) {
-      console.log('findAll board error', error);
+      console.log('findAll boardService', error);
       throw new InternalServerErrorException('Failed to fetch boards');
     }
   }
 
-  async findOne(id: string): Promise<Board | null> {
+  async findOne(id: string): Promise<Board> {
     try {
       const data = await this.boardsRepo.findOneBy({ id });
+      if (!data) throw new NotFoundException('board not found');
       return data;
     } catch (error) {
-      console.log('findOne board error', id, error);
-      throw new NotFoundException('board not found');
+      console.log('findOne boardService', id, error);
+      throw error;
     }
   }
 
   async update(oldId: string, updateBoardDto: UpdateBoardDto) {
     try {
       const newBoard = await this.create({ id: updateBoardDto.id as string });
-      console.log(newBoard);
-
-      await this.tasksRepo.update(
-        { boardId: oldId },
-        { boardId: updateBoardDto.id },
-      );
-
       if (newBoard) {
+        await this.tasksRepo.update(
+          { boardId: oldId },
+          { boardId: updateBoardDto.id },
+        );
         await this.remove(oldId);
         return newBoard;
       }

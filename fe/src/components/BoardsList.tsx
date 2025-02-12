@@ -1,8 +1,5 @@
 "use client";
-import { IBoardSections } from "@/types";
 import React, { useEffect, useState } from "react";
-import { RiDeleteBin5Line } from "react-icons/ri";
-import { LiaEditSolid } from "react-icons/lia";
 import Modal from "./Modal";
 import BoardForm from "./BoardForm";
 import {
@@ -13,20 +10,24 @@ import {
 } from "@/redux/slices/apiSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
-import { SerializedError } from "@reduxjs/toolkit";
+import CardBtns from "./CardBtns";
+import toast from "react-hot-toast";
 
 const BoardsList = () => {
   const dispatch = useAppDispatch();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedBoard, setSelectedBoard] = useState<string>("");
-  const { boards, tasks, boardId } = useAppSelector((state) => state.board);
+  const { boards, boardId } = useAppSelector((state) => state.board);
 
-  const [addBoard, { error: addError, isLoading: addLoading }] =
-    useAddBoardMutation();
-  const [delBoard, { error: deleteError, isLoading: deleteLoading }] =
-    useDeleteBoardMutation();
+  const [addBoard] = useAddBoardMutation();
+  const [delBoard] = useDeleteBoardMutation();
   const [updateBoard] = useUpdateBoardMutation();
+  const { data: allBoards } = useGetBoardsQuery();
+
+  useEffect(() => {
+    if (!boards) dispatch(setBoards(allBoards));
+  }, [allBoards]);
 
   const handleModalOpen = (board?: string | null) => {
     setIsModalOpen(true);
@@ -39,18 +40,21 @@ const BoardsList = () => {
   };
 
   const deleteBoard = async (id: string) => {
-    const res = await delBoard(boardId);
-    if (res.data) {
-      const updatedBoards = boards.filter((board) => board.id !== id);
+    try {
+      const deletedBoardId = await delBoard(id).unwrap();
+      const updatedBoards = boards.filter(
+        (board) => board.id !== deletedBoardId
+      );
       dispatch(setBoards(updatedBoards));
-      // hot toast here board deleted
-      if (boardId === id) {
+
+      if (boardId === deletedBoardId) {
         dispatch(setTasks(undefined));
         dispatch(setBoardId(""));
       }
-    } else if (res.error) {
-      console.log(res.error);
-      // hot tast error here
+
+      toast.success("Successfully deleted!");
+    } catch (error) {
+      toast.error(error.data.message);
     }
   };
 
@@ -60,33 +64,26 @@ const BoardsList = () => {
         const res = await updateBoard({
           oldId: selectedBoard,
           id: data.boardId,
-        });
-        console.log(res, "res update board");
+        }).unwrap();
+
         const updated = boards.map((el) =>
-          el.id === selectedBoard ? res.data : el
+          el.id === selectedBoard ? res : el
         );
         dispatch(setBoards(updated));
 
-        if (boardId === selectedBoard) dispatch(setBoardId(res.data?.id));
-
-        // hot toast updated board
+        if (boardId === selectedBoard) dispatch(setBoardId(res.id));
+        toast.success("Successfully updated!");
       } else {
-        const res = await addBoard({ id: data.boardId });
-        console.log(res);
+        const res = await addBoard({ id: data.boardId }).unwrap();
 
-        if (res.data) {
-          const updatedBoards = [...boards, res.data];
-          dispatch(setBoards(updatedBoards));
-          // hot toast here
-        } else if (res.error) {
-          console.log(res.error.data.message);
-          // hot tast error here
-        }
+        const updatedBoards = [...boards, res];
+        dispatch(setBoards(updatedBoards));
+
+        toast.success("Successfully createdted!");
       }
       handleModalClose();
     } catch (error) {
-      console.log(error);
-      // hot tast error here
+      toast.error(error.data.message);
     }
   };
 
@@ -107,21 +104,10 @@ const BoardsList = () => {
               className="bg-gray-100 shadow-md rounded-sm p-3 flex justify-between w-1/4 min-w-[200px] grow"
             >
               <p>{board.id}</p>
-
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => handleModalOpen(board.id)}
-                  className="hover:scale-105"
-                >
-                  <LiaEditSolid className="w-5 h-5" title="edit icon" />
-                </button>
-                <button
-                  className="hover:scale-105"
-                  onClick={() => deleteBoard(board.id)}
-                >
-                  <RiDeleteBin5Line className="w-5 h-5" title="delete icon" />
-                </button>
-              </div>
+              <CardBtns
+                deleteEl={() => deleteBoard(board.id)}
+                handleModalOpen={() => handleModalOpen(board.id)}
+              />
             </li>
           ))
         ) : (

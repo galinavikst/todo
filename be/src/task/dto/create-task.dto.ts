@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateTaskDto {
@@ -7,9 +8,14 @@ export class CreateTaskDto {
   @IsNotEmpty()
   status: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   description: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   title: string;
+
+  @IsNotEmpty()
+  orderIndex: number;
 }

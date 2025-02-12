@@ -1,58 +1,45 @@
 "use client";
 import {
-  useGetBoardsQuery,
   useLazyGetBoardByIdQuery,
   useLazyGetBoardsQuery,
   useLazyGetTasksByBoardIdQuery,
 } from "@/redux/slices/apiSlice";
 import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
-import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { useAppDispatch } from "@/redux/store";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const BoardLoader = () => {
   const dispatch = useAppDispatch();
-
-  // const { data: allBoards, isLoading: allBoardsidLoading } =
-  //   useGetBoardsQuery();
   const [getAllBoards] = useLazyGetBoardsQuery();
-  const [getTasksByBoardId, { data: board, error, isLoading }] =
-    useLazyGetTasksByBoardIdQuery();
+  const [getTasksByBoardId] = useLazyGetTasksByBoardIdQuery();
+  const [getBoardById] = useLazyGetBoardByIdQuery();
 
   const [searchValue, setSearchValue] = useState<string>("");
-  const { boards } = useAppSelector((state) => state.board);
-  console.log("BoardLoader", boards);
 
   useEffect(() => {
     const getBoards = async () => {
       try {
-        const res = await getAllBoards();
-        if (res.data) dispatch(setBoards(res.data));
+        const res = await getAllBoards().unwrap();
+        if (res) dispatch(setBoards(res));
       } catch (error) {
-        console.log(error);
+        toast.error(error.data.message);
       }
     };
-
     getBoards();
-
-    // if (allBoards) dispatch(setBoards(allBoards));
   }, []);
 
   const handleLoad = async () => {
     if (!searchValue.trim()) return;
 
-    console.log("handle load boards", boards);
-
-    const selectedBoard = boards.find((el) => el.id === searchValue);
-    if (selectedBoard) {
+    try {
+      const selectedBoard = await getBoardById(searchValue).unwrap();
       dispatch(setBoardId(selectedBoard.id));
-
-      // get tasks fot board here
-      const res = await getTasksByBoardId(selectedBoard.id);
-      console.log(res);
-      if (res.data) dispatch(setTasks(res.data));
-    } else {
-      //hot toast here
-      console.log("board not found");
+      const res = await getTasksByBoardId(selectedBoard.id).unwrap();
+      dispatch(setTasks(res));
+      toast.success("Loaded!");
+    } catch (error) {
+      toast.error(error.data.message);
     }
   };
 

@@ -1,7 +1,6 @@
 import { API_PORT } from "@/constants";
 import { IBoard, ITask } from "@/types";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { Product } from "./productsSlice";
 
 export const todoApi = createApi({
   reducerPath: "todoApi",

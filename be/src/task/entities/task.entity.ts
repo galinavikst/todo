@@ -19,6 +19,9 @@ export class Task {
   title: string;
 
   @Column()
+  orderIndex: number;
+
+  @Column()
   status: string;
 
   @Column()

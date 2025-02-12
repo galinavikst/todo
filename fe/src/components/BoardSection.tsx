@@ -13,10 +13,11 @@ import { useAppDispatch, useAppSelector } from "@/redux/store";
 import {
   useAddTaskMutation,
   useDeleteTaskMutation,
-  useGetBoardsQuery,
+  useLazyGetTasksByBoardIdQuery,
   useUpdateTaskMutation,
 } from "@/redux/slices/apiSlice";
-import { setBoards, setTasks } from "@/redux/slices/boardSlice";
+import { setTasks } from "@/redux/slices/boardSlice";
+import toast from "react-hot-toast";
 
 type BoardSectionProps = {
   id: Status;
@@ -33,20 +34,19 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const { boardId, tasks: stateTasks } = useAppSelector((state) => state.board);
 
-  const [addTask, {}] = useAddTaskMutation();
-  const [delelteTaskMutation, {}] = useDeleteTaskMutation();
-  const [updateTaskMutaion] = useUpdateTaskMutation();
+  const [addTask] = useAddTaskMutation();
+  const [delelteTask] = useDeleteTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
+  const [getBoardTasks] = useLazyGetTasksByBoardIdQuery();
 
-  const deleteTask = async (taskId: number) => {
-    console.log(taskId, "remove here");
+  const handleDeleteTask = async (taskId: number) => {
     try {
-      await delelteTaskMutation(taskId);
+      await delelteTask(taskId).unwrap();
       const updatedTask = stateTasks.filter((el: ITask) => el.id !== taskId);
       dispatch(setTasks(updatedTask));
-      // hot toast here deleted id in res
+      toast.success("Deleted!");
     } catch (error) {
-      console.log(error, "deleteTask");
-      // hot toast here not deleted id
+      toast.error(error.data.message);
     }
   };
 
@@ -63,26 +63,28 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
   const handleModalSave = async (data: Partial<ITask>) => {
     try {
       if (selectedTask) {
-        const res = await updateTaskMutaion({ id: selectedTask.id, ...data });
-        console.log(res, "update task");
+        const res = await updateTask({ id: selectedTask.id, ...data }).unwrap();
         const updated = stateTasks.map((el) =>
-          el.id === selectedTask.id ? res.data : el
+          el.id === selectedTask.id ? res : el
         );
+
         dispatch(setTasks(updated));
-        /// hot toast here task updated
+        toast.success("Updated!");
       } else {
+        const boardTasks = await getBoardTasks(boardId).unwrap();
         const res = await addTask({
           ...data,
           boardId,
           status: "to do",
-        });
-        dispatch(setTasks([...stateTasks, res.data]));
-        /// hot toast here task created
+          orderIndex: boardTasks.length + 1,
+        }).unwrap();
+
+        dispatch(setTasks([...stateTasks, res]));
+        toast.success("Created!");
       }
       handleModalClose();
     } catch (error) {
-      console.log(error, "create task");
-      /// hot toast here task not created
+      toast.error(error.data.message);
     }
   };
 
@@ -101,7 +103,7 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
                 <Task
                   task={el}
                   handleModalOpen={handleModalOpen}
-                  deleteTask={deleteTask}
+                  deleteTask={handleDeleteTask}
                 />
               </Fragment>
             ))}
@@ -123,11 +125,7 @@ const BoardSection = ({ tasks, title, id }: BoardSectionProps) => {
           form="taskForm"
           handleModalClose={handleModalClose}
           children={
-            <TaskForm
-              boardId="testid"
-              onsubmit={handleModalSave}
-              defaultValues={selectedTask}
-            />
+            <TaskForm onsubmit={handleModalSave} defaultValues={selectedTask} />
           }
         />
       )}

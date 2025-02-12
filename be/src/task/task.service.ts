@@ -16,12 +16,10 @@ export class TaskService {
     private taskRepo: Repository<Task>,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto) {
+  async create(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
       const newTask = this.taskRepo.create(createTaskDto);
       const res = await this.taskRepo.save(newTask);
-      console.log(res, 'res create task service');
-
       return res;
     } catch (error) {
       console.log('create task service error', error);
@@ -31,30 +29,34 @@ export class TaskService {
 
   async findAll(): Promise<Task[]> {
     try {
-      const tasks = await this.taskRepo.find();
-      return tasks;
+      return await this.taskRepo.find();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
   async getTasksByBoardId(boardId: string): Promise<Task[]> {
-    return await this.taskRepo.find({
-      where: { boardId },
-    });
-  }
-
-  async findOne(id: number): Promise<Task | null> {
     try {
-      const data = await this.taskRepo.findOneBy({ id });
-      return data;
+      return await this.taskRepo.find({
+        where: { boardId },
+      });
     } catch (error) {
-      console.log('findOne task error', id, error);
-      throw new NotFoundException('task not found');
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task | null> {
+  async findOne(id: number): Promise<Task> {
+    try {
+      const data = await this.taskRepo.findOneBy({ id });
+      if (!data) throw new NotFoundException('task not found');
+      return data;
+    } catch (error) {
+      console.log('findOne taskService', id, error);
+      throw error;
+    }
+  }
+
+  async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const res = await this.taskRepo.update(id, updateTaskDto);
     if (res.affected) return await this.findOne(id);
     else throw new InternalServerErrorException();

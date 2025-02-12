@@ -15,13 +15,15 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useAppSelector } from "@/redux/store";
+import { useUpdateTaskMutation } from "@/redux/slices/apiSlice";
+import toast from "react-hot-toast";
 
 const BoardSectionList = () => {
+  const [updateTask] = useUpdateTaskMutation();
   const { tasks, boardId } = useAppSelector((state) => state.board);
   const [boardSections, setBoardSections] = useState<IBoardSections>({});
 
   useEffect(() => {
-    console.log("BoardSectionList useeffect", boardId);
     if (tasks) setBoardSections(initializeBoard(tasks));
   }, [tasks]);
 
@@ -82,9 +84,14 @@ const BoardSectionList = () => {
         ],
       };
     });
+
+    //   console.log("updated");
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = async ({ active, over }: DragEndEvent) => {
     const activeContainer = findBoardSectionContainer(
       boardSections,
       active.id as string
@@ -109,15 +116,32 @@ const BoardSectionList = () => {
       (task) => task.id === over?.id
     );
 
-    if (activeIndex !== overIndex) {
-      setBoardSections((boardSection) => ({
-        ...boardSection,
-        [overContainer]: arrayMove(
-          boardSection[overContainer],
-          activeIndex,
-          overIndex
-        ),
-      }));
+    // change task (order and status) with id active => task.status = any of container value
+    const newTasksOrder = arrayMove(
+      boardSections[overContainer],
+      activeIndex,
+      overIndex
+    );
+
+    try {
+      await Promise.all(
+        newTasksOrder.map((task, i) =>
+          updateTask({
+            id: task.id,
+            orderIndex: i + 1,
+            status: task.id === active.id ? activeContainer : task.status,
+          }).unwrap()
+        )
+      );
+
+      if (activeIndex !== overIndex) {
+        setBoardSections((boardSection) => ({
+          ...boardSection,
+          [overContainer]: newTasksOrder,
+        }));
+      }
+    } catch (error) {
+      toast.error(error.data.message);
     }
   };
 
