@@ -1,0 +1,10 @@
+services:
+  react:
+    # build: .
+    image: halynavs/todo-react # => pull image from docker hub
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/todo-react
+      - ./node_modules:/todo-react/node_modules
+    command: ["npm", "run", "start"]

@@ -12,6 +12,7 @@ import {
   closestCorners,
   DragEndEvent,
   DragOverEvent,
+  UniqueIdentifier,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useAppSelector } from "@/redux/store";

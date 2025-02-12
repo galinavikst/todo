@@ -1,0 +1,43 @@
+services:
+  node:
+    # build: .
+    image: halynavs/todo-node # => pull image from docker hub
+    restart: always # restart the container if it stops for any reason
+    ports:
+      - ${API_PORT}:${API_PORT}
+    depends_on:
+      - postgres
+    environment:
+      - PORT=${API_PORT}
+    networks:
+      - home-network
+    volumes:
+      # reloading project with changes
+      - .:/todo-node-nestjs # Mount entire project
+      - /todo-node-nestjs/node_modules # Prevents overwriting node_modules if reloading
+    command: ['npm', 'run', 'start:dev']
+
+  postgres:
+    # build: ./src
+    image: halynavs/todo-postgres # => pull image from docker hub
+    restart: on-failure # Restart only on failure, not when manually stopped
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_DB=${DB_DATABASE}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    networks:
+      - home-network
+    volumes:
+      # storage for database data and PostgreSQL logs
+      - db-data:/var/lib/postgresql/data
+      - db-logs:/var/log/postgresql
+
+networks:
+  home-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  db-logs:
