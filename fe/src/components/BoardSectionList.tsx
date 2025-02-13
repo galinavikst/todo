@@ -1,5 +1,5 @@
 "use client";
-import { IBoardSections, Status } from "@/types";
+import { IBoardSections, ITask, Status } from "@/types";
 import { findBoardSectionContainer, initializeBoard } from "@/utils/board";
 import React, { Fragment, useEffect, useState } from "react";
 import BoardSection from "./BoardSection";
@@ -12,21 +12,39 @@ import {
   closestCorners,
   DragEndEvent,
   DragOverEvent,
-  UniqueIdentifier,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import { useAppSelector } from "@/redux/store";
-import { useUpdateTaskMutation } from "@/redux/slices/apiSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import {
+  useLazyGetTasksByBoardIdQuery,
+  useUpdateTaskMutation,
+} from "@/redux/slices/apiSlice";
 import toast from "react-hot-toast";
+import { setTasks } from "@/redux/slices/boardSlice";
 
 const BoardSectionList = () => {
   const [updateTask] = useUpdateTaskMutation();
-  const { tasks, boardId } = useAppSelector((state) => state.board);
+  const dispatch = useAppDispatch();
+
+  const { boardId, tasks } = useAppSelector((state) => state.board);
   const [boardSections, setBoardSections] = useState<IBoardSections>({});
 
+  const [getTasksByBoardId, { isLoading: isTaskLoading }] =
+    useLazyGetTasksByBoardIdQuery();
+
   useEffect(() => {
-    if (tasks) setBoardSections(initializeBoard(tasks));
-  }, [tasks]);
+    const getTasksByBoard = async () => {
+      try {
+        const res = await getTasksByBoardId(boardId).unwrap();
+        setBoardSections(initializeBoard(res));
+        dispatch(setTasks(res));
+      } catch (error) {
+        toast.error(error.data.message);
+      }
+    };
+
+    if (boardId) getTasksByBoard();
+  }, [boardId, tasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -150,22 +168,26 @@ const BoardSectionList = () => {
     <div>
       {boardId && <p className="font-bold uppercase text-center">{boardId}</p>}
       <div className="flex gap-3 flex-wrap">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          {Object.keys(boardSections).map((status) => (
-            <Fragment key={status}>
-              <BoardSection
-                tasks={boardSections[status]}
-                title={status}
-                id={status as Status}
-              />
-            </Fragment>
-          ))}
-        </DndContext>
+        {isTaskLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            {Object.keys(boardSections).map((status) => (
+              <Fragment key={status}>
+                <BoardSection
+                  tasks={boardSections[status]}
+                  title={status}
+                  id={status as Status}
+                />
+              </Fragment>
+            ))}
+          </DndContext>
+        )}
       </div>
     </div>
   );

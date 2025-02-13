@@ -9,7 +9,7 @@ import {
   useUpdateBoardMutation,
 } from "@/redux/slices/apiSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
+import { setBoardId, setBoards } from "@/redux/slices/boardSlice";
 import CardBtns from "./CardBtns";
 import toast from "react-hot-toast";
 
@@ -18,7 +18,7 @@ const BoardsList = () => {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedBoard, setSelectedBoard] = useState<string>("");
-  const { boards, boardId } = useAppSelector((state) => state.board);
+  const { boardId, boards } = useAppSelector((state) => state.board);
 
   const [addBoard] = useAddBoardMutation();
   const [delBoard] = useDeleteBoardMutation();
@@ -47,10 +47,7 @@ const BoardsList = () => {
       );
       dispatch(setBoards(updatedBoards));
 
-      if (boardId === deletedBoardId) {
-        dispatch(setTasks(undefined));
-        dispatch(setBoardId(""));
-      }
+      if (boardId === deletedBoardId) dispatch(setBoardId(""));
 
       toast.success("Successfully deleted!");
     } catch (error) {

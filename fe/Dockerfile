@@ -20,6 +20,12 @@ FROM node:22-alpine AS runner
 # Set the working directory inside the container
 WORKDIR /todo-react
 
+# Copy files from the builder stage
+COPY --from=builder /todo-react/package.json ./
+COPY --from=builder /todo-react/node_modules ./node_modules
+COPY --from=builder /todo-react/.next ./.next
+COPY --from=builder /todo-react/public ./public
+
 # Expose the application's default port
 EXPOSE 3000
 

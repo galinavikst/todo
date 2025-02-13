@@ -1,33 +1,15 @@
 "use client";
-import {
-  useLazyGetBoardByIdQuery,
-  useLazyGetBoardsQuery,
-  useLazyGetTasksByBoardIdQuery,
-} from "@/redux/slices/apiSlice";
-import { setBoardId, setBoards, setTasks } from "@/redux/slices/boardSlice";
+import { useLazyGetBoardByIdQuery } from "@/redux/slices/apiSlice";
+import { setBoardId } from "@/redux/slices/boardSlice";
 import { useAppDispatch } from "@/redux/store";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 const BoardLoader = () => {
   const dispatch = useAppDispatch();
-  const [getAllBoards] = useLazyGetBoardsQuery();
-  const [getTasksByBoardId] = useLazyGetTasksByBoardIdQuery();
-  const [getBoardById] = useLazyGetBoardByIdQuery();
-
   const [searchValue, setSearchValue] = useState<string>("");
 
-  useEffect(() => {
-    const getBoards = async () => {
-      try {
-        const res = await getAllBoards().unwrap();
-        if (res) dispatch(setBoards(res));
-      } catch (error) {
-        toast.error(error.data.message);
-      }
-    };
-    getBoards();
-  }, []);
+  const [getBoardById] = useLazyGetBoardByIdQuery();
 
   const handleLoad = async () => {
     if (!searchValue.trim()) return;
@@ -35,9 +17,6 @@ const BoardLoader = () => {
     try {
       const selectedBoard = await getBoardById(searchValue).unwrap();
       dispatch(setBoardId(selectedBoard.id));
-      const res = await getTasksByBoardId(selectedBoard.id).unwrap();
-      dispatch(setTasks(res));
-      toast.success("Loaded!");
     } catch (error) {
       toast.error(error.data.message);
     }
