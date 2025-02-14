@@ -58,6 +58,17 @@ export class BoardService {
     }
   }
 
+  async getTasksByBoardId(boardId: string): Promise<Task[]> {
+    try {
+      return await this.tasksRepo.find({
+        where: { boardId },
+      });
+    } catch (error) {
+      console.log('getTasksByBoardId boardService', boardId, error);
+      throw error;
+    }
+  }
+
   async update(oldId: string, updateBoardDto: UpdateBoardDto) {
     try {
       const newBoard = await this.create({ id: updateBoardDto.id as string });

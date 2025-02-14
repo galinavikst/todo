@@ -34,12 +34,6 @@ export class TaskController {
     return this.taskService.findOne(+id);
   }
 
-  @Get('/board/:boardId')
-  @ApiOperation({ summary: 'Get all board tasks' })
-  async getTasksByBoard(@Param('boardId') boardId: string) {
-    return this.taskService.getTasksByBoardId(boardId);
-  }
-
   @Patch(':id')
   @ApiOperation({ summary: 'Update task' })
   update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {

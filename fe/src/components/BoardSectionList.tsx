@@ -1,5 +1,5 @@
 "use client";
-import { IBoardSections, ITask, Status } from "@/types";
+import { IBoardSections, Status } from "@/types";
 import { findBoardSectionContainer, initializeBoard } from "@/utils/board";
 import React, { Fragment, useEffect, useState } from "react";
 import BoardSection from "./BoardSection";
@@ -103,11 +103,6 @@ const BoardSectionList = () => {
         ],
       };
     });
-
-    //   console.log("updated");
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   const handleDragEnd = async ({ active, over }: DragEndEvent) => {

@@ -13,6 +13,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { Board } from './entities/board.entity';
 import { ApiOperation } from '@nestjs/swagger';
+import { Task } from 'src/task/entities/task.entity';
 
 @Controller('board')
 export class BoardController {
@@ -36,6 +37,12 @@ export class BoardController {
   @ApiOperation({ summary: 'Get one board' })
   findOne(@Param('id') id: string) {
     return this.boardService.findOne(id);
+  }
+
+  @Get('/:boardId/tasks')
+  @ApiOperation({ summary: 'Get all board tasks' })
+  async getTasksByBoard(@Param('boardId') boardId: string): Promise<Task[]> {
+    return await this.boardService.getTasksByBoardId(boardId);
   }
 
   @Patch(':id')

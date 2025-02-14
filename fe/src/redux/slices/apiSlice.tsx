@@ -20,7 +20,7 @@ export const todoApi = createApi({
       query: (id) => `/board/${id}`,
     }),
     getTasksByBoardId: builder.query<ITask[], string>({
-      query: (id) => `task/board/${id}`,
+      query: (id) => `board/${id}/tasks`,
     }),
     deleteBoard: builder.mutation<string, string>({
       query(id) {

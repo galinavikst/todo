@@ -35,16 +35,6 @@ export class TaskService {
     }
   }
 
-  async getTasksByBoardId(boardId: string): Promise<Task[]> {
-    try {
-      return await this.taskRepo.find({
-        where: { boardId },
-      });
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-
   async findOne(id: number): Promise<Task> {
     try {
       const data = await this.taskRepo.findOneBy({ id });
