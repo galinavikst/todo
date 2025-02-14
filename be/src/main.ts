@@ -4,20 +4,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   // filter out properties that should not be received by the method handler
   // any property not included in the whitelist is automatically stripped from the resulting object
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, stopAtFirstError: true }),
   );
-
-  app.enableCors({
-    origin: 'http://localhost:3000', // frontend URL
-    methods: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization', // headers are allowed for auth
-    credentials: true, // Enable credentials (cookies or authorization tokens)
-  });
 
   const config = new DocumentBuilder()
     .setTitle('Todo')
