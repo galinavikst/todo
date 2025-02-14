@@ -19,6 +19,7 @@
 - [Typescript](https://www.typescriptlang.org/): A modern programming language.
 - [Next.js](https://nextjs.org/): A React framework for building server-rendered applications.
 - [Tailwind](https://tailwindcss.com/): A popular utility-first CSS framework.
+- [Redux Toolkit & RTK Query](https://redux-toolkit.js.org/): A set of tools for efficient Redux development.
 - [Dnd kit](https://dndkit.com/): A lightweight, performant, accessible and extensible drag & drop toolkit for React.
 
 ## Installation
